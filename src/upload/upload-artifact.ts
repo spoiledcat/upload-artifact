@@ -7,6 +7,7 @@ import {findFilesToUpload} from '../shared/search'
 import {getInputs} from './input-helper'
 import {NoFileOptions} from './constants'
 import {uploadArtifact} from '../shared/upload-artifact'
+import * as path from 'path'
 
 async function deleteArtifactIfExists(artifactName: string): Promise<void> {
   try {
@@ -70,11 +71,22 @@ export async function run(): Promise<void> {
       options.compressionLevel = inputs.compressionLevel
     }
 
-    await uploadArtifact(
-      inputs.artifactName,
-      searchResult.filesToUpload,
-      searchResult.rootDirectory,
-      options
-    )
+    if (searchResult.filesToUpload.length > 1) {
+      searchResult.filesToUpload.map(file => {
+        uploadArtifact(
+          path.basename(file),
+          [file],
+          searchResult.rootDirectory,
+          options
+        )
+      })
+    } else {
+      await uploadArtifact(
+        inputs.artifactName,
+        searchResult.filesToUpload,
+        searchResult.rootDirectory,
+        options
+      )
+    }
   }
 }
